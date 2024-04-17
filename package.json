@@ -1,0 +1,32 @@
+{
+  "name": "@ethermail/ethermail-wallet-provider",
+  "version": "0.0.0",
+  "description": "Provider for EtherMail wallet",
+  "private": false,
+  "repository": "https://github.com/Ethersuite/ethermail-wallet-provider",
+  "homepage": "https://ethermail.io",
+  "bugs": {
+    "url": "https://github.com/Ethersuite/ethermail-wallet-provider/issues"
+  },
+  "license": "MIT",
+  "author": "EtherMail <ethermail.io>",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "tsc --noEmit",
+    "ci": "pnpm lint && pnpm build",
+    "release": "pnpm lint && pnpm build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.4"
+  },
+  "dependencies": {
+    "jwt-decode": "^4.0.0",
+    "socket.io-client": "^4.7.5",
+    "viem": "^2.9.13"
+  }
+}

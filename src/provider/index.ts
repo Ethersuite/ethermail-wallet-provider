@@ -1,0 +1,1 @@
+export { EtherMailProvider } from './provider';
