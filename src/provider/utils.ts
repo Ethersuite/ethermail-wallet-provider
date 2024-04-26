@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import { SupportedChain, JWTPayload } from "./types";
+import type { SupportedChain, JWTPayload } from "./types";
 
 export const supportedChains = [1, 137] as const;
 
@@ -20,7 +20,7 @@ export function getProposerInfo() {
 
   const proposerName = header.getElementsByTagName("title")[0]?.innerText ?? "";
   const proposerURL = url.origin;
-  const proposerIcon = `${url.origin}${icon}`;
+  const proposerIcon = icon ? `${proposerURL}${icon}` : `${proposerURL}`;
 
   return { proposerName, proposerURL, proposerIcon };
 }
@@ -34,7 +34,11 @@ export function decodeToken(): JWTPayload | null {
   return decoded;
 }
 
-export function buildRequestData(method: string, data: string, chainId: SupportedChain) {
+export function buildRequestData(
+  method: string,
+  data: string,
+  chainId: SupportedChain
+) {
   const { proposerName, proposerURL, proposerIcon } = getProposerInfo();
 
   return {

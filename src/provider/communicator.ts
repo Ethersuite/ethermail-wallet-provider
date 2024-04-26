@@ -1,7 +1,7 @@
 import type { Socket as SocketIO } from "socket.io-client";
 import io from "socket.io-client";
 import { buildRequestData } from "./utils";
-import { SupportedChain, Strategy } from "./types";
+import type { SupportedChain, Strategy } from "./types";
 
 export class Communicator {
   private static instance?: Communicator;
@@ -9,6 +9,7 @@ export class Communicator {
   private strategy: Strategy;
   private appUrl: string;
   private websocketServer: string;
+  private clientId?: string;
 
   private constructor(
     strategy: Strategy,
@@ -25,6 +26,10 @@ export class Communicator {
         auth: {
           token: localStorage.getItem("ethermail_token"),
         },
+      });
+
+      this.socket.on("connect", () => {
+        this.clientId = this.socket?.id;
       });
     }
   }
@@ -60,11 +65,22 @@ export class Communicator {
     chainId: SupportedChain;
   }) {
     if (this.strategy === "ws") {
-      this.socket?.emit("wallet-action", {
-        ...buildRequestData(method, data, chainId),
-        sessionId: this.socket?.id,
-        bridge: "ws",
-      });
+      if (this.clientId) {
+        this.socket?.emit("wallet-action", {
+          ...buildRequestData(method, data, chainId),
+          sessionId: this.socket?.id,
+          bridge: "ws",
+        });
+      } else {
+        this.socket?.once("connect", () => {
+          this.clientId = this.socket?.id;
+          this.socket?.emit("wallet-action", {
+            ...buildRequestData(method, data, chainId),
+            sessionId: this.socket?.id,
+            bridge: "ws",
+          });
+        });
+      }
 
       const response = await new Promise((resolve, reject) => {
         this.socket?.on("wallet-action-response", (data) => {

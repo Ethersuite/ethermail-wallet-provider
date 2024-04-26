@@ -2,7 +2,7 @@ import { decodeToken, supportedChains } from "./utils";
 import { Communicator } from "./communicator";
 import { hexToString } from "viem";
 import { getPublicClient } from "./client";
-import { SupportedChain, EIP1193Provider, Strategy } from "./types";
+import type { SupportedChain, EIP1193Provider, Strategy } from "./types";
 
 export class EtherMailProvider implements EIP1193Provider {
   private _chainId: SupportedChain;
@@ -51,6 +51,9 @@ export class EtherMailProvider implements EIP1193Provider {
   }
 
   async request(request: { method: string; params?: any }) {
+    console.log(request);
+
+
     this._communicator = Communicator.getInstance(
       this._strategy,
       this._websocketServer,

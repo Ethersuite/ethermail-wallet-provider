@@ -1,6 +1,6 @@
 import { http, createPublicClient, Chain } from "viem";
 import { mainnet, polygon } from "viem/chains";
-import { SupportedChain } from "./types";
+import type { SupportedChain } from "./types";
 
 export const getPublicClient = (chainId: SupportedChain) => {
   let chain: Chain = mainnet;
