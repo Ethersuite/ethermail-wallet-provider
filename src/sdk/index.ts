@@ -1,4 +1,4 @@
-export async function initEtherMail() {
+export function initEtherMail() {
   const url = new URL(window.location.href);
 
   if (url.pathname === "/ethermailCallback") {
