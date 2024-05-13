@@ -1,9 +1,13 @@
 export interface JWTPayload {
   exp: number;
+  iat: number;
+  iss: string;
   sub: string;
-  token: string;
-  username: `0x${string}`;
+  permissions: 'none' | 'read' | 'write';
+  type: 'sso' | 'wallet';
+  origin: string;
   address: string;
+  wallet: `0x${string}`;
 }
 
 export interface RequestArguments {

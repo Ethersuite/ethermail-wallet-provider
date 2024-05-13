@@ -6,7 +6,7 @@ import type { SupportedChain, EIP1193Provider, Strategy } from "./types";
 
 export class EtherMailProvider implements EIP1193Provider {
   private _chainId: SupportedChain;
-  private _communicator: Communicator;
+  private _communicator?: Communicator;
   private _strategy: Strategy;
   private _appUrl: string;
   private _websocketServer: string;
@@ -53,7 +53,6 @@ export class EtherMailProvider implements EIP1193Provider {
   async request(request: { method: string; params?: any }) {
     console.log(request);
 
-
     this._communicator = Communicator.getInstance(
       this._strategy,
       this._websocketServer,
@@ -76,9 +75,9 @@ export class EtherMailProvider implements EIP1193Provider {
             return;
           }
 
-          account = decodedToken.username.split("@")[0];
+          account = decodedToken.wallet;
         } else {
-          account = await this._communicator.emitAndWaitForResponse({
+          account = await this._communicator?.emitAndWaitForResponse({
             method,
             data: null,
             chainId: this.chainId,
@@ -160,14 +159,14 @@ export class EtherMailProvider implements EIP1193Provider {
         return await publicClient.getGasPrice();
 
       case "eth_sendTransaction":
-        return await this._communicator.emitAndWaitForResponse({
+        return await this._communicator?.emitAndWaitForResponse({
           method,
           data: params[0],
           chainId: this.chainId,
         });
 
       case "eth_signTypedData_v4":
-        return await this._communicator.emitAndWaitForResponse({
+        return await this._communicator?.emitAndWaitForResponse({
           method,
           data: params[1],
           chainId: this.chainId,
@@ -177,7 +176,7 @@ export class EtherMailProvider implements EIP1193Provider {
       case "personal_sign":
       case "eth_signTypedData":
       case "eth_signTransaction":
-        return await this._communicator.emitAndWaitForResponse({
+        return await this._communicator?.emitAndWaitForResponse({
           method,
           data: hexToString(params[0]),
           chainId: this.chainId,

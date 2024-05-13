@@ -1,6 +1,6 @@
 import type { Socket as SocketIO } from "socket.io-client";
 import io from "socket.io-client";
-import { buildRequestData } from "./utils";
+import { buildRequestData, decodeToken, dispatchErrorEvent } from "./utils";
 import type { SupportedChain, Strategy } from "./types";
 
 export class Communicator {
@@ -20,16 +20,22 @@ export class Communicator {
     this.websocketServer = websocketServer;
     this.appUrl = appUrl;
 
-    if (!this.socket && strategy === "ws") {
+    const token = localStorage.getItem("ethermail_token");
+
+    if (!this.socket && strategy === "ws" && token) {
       this.socket = io(this.websocketServer, {
         transports: ["websocket"],
         auth: {
-          token: localStorage.getItem("ethermail_token"),
+          token,
         },
       });
 
       this.socket.on("connect", () => {
         this.clientId = this.socket?.id;
+      });
+
+      this.socket?.on("connect_error", (error) => {
+        console.log("CONNECT ERROR");
       });
     }
   }
@@ -38,13 +44,23 @@ export class Communicator {
     strategy: Strategy,
     websocketServer: string,
     appUrl: string
-  ): Communicator {
+  ): Communicator | undefined {
     if (!Communicator.instance) {
-      Communicator.instance = new Communicator(
-        strategy,
-        websocketServer,
-        appUrl
-      );
+      if (strategy === "ws" && localStorage.getItem("ethermail_token")) {
+        Communicator.instance = new Communicator(
+          strategy,
+          websocketServer,
+          appUrl
+        );
+      }
+
+      if (strategy === "iframe") {
+        Communicator.instance = new Communicator(
+          strategy,
+          websocketServer,
+          appUrl
+        );
+      }
     }
 
     return Communicator.instance;
@@ -53,6 +69,17 @@ export class Communicator {
   public disconnect() {
     this.socket?.disconnect();
     Communicator.instance = undefined;
+  }
+
+  private checkPermissions() {
+    const decodedToken = decodeToken();
+    if (decodedToken?.permissions !== "write") {
+      dispatchErrorEvent("permissions");
+      return Promise.reject({
+        message: "Wrong permissions",
+        code: 4100,
+      });
+    }
   }
 
   public async emitAndWaitForResponse({
@@ -65,15 +92,20 @@ export class Communicator {
     chainId: SupportedChain;
   }) {
     if (this.strategy === "ws") {
+
       if (this.clientId) {
+          await this.checkPermissions();
+
         this.socket?.emit("wallet-action", {
           ...buildRequestData(method, data, chainId),
           sessionId: this.socket?.id,
           bridge: "ws",
         });
       } else {
-        this.socket?.once("connect", () => {
+        this.socket?.once("connect", async() => {
           this.clientId = this.socket?.id;
+          await this.checkPermissions();
+          
           this.socket?.emit("wallet-action", {
             ...buildRequestData(method, data, chainId),
             sessionId: this.socket?.id,
@@ -83,6 +115,12 @@ export class Communicator {
       }
 
       const response = await new Promise((resolve, reject) => {
+        this.socket?.on("token-error", () => {
+          localStorage.removeItem("ethermail_token");
+
+          dispatchErrorEvent("expired");
+        });
+
         this.socket?.on("wallet-action-response", (data) => {
           if (data.data) {
             resolve(data.data);
