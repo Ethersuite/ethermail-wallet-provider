@@ -52,3 +52,11 @@ export function buildRequestData(
     version: 1,
   };
 }
+
+export function dispatchErrorEvent(type: "permissions" | "expired") {
+  const customEvent = new CustomEvent("EtherMailTokenError", {
+    detail: { type },
+  });
+
+  window.dispatchEvent(customEvent);
+}
