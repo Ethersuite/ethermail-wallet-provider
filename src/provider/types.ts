@@ -8,6 +8,7 @@ export interface JWTPayload {
   origin: string;
   address: string;
   wallet: `0x${string}`;
+  ethermail_verified: boolean;
 }
 
 export interface RequestArguments {
