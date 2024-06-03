@@ -32,3 +32,5 @@ export type SupportedChain = 1 | 137;
 export type TokenErrorType = "permissions" | "expired";
 
 export type SupportedEvents = 'connect' | 'disconnect' | 'chainChanged' | 'accountsChanged' | 'message';
+
+export type Listener = (...args: any[]) => void;
