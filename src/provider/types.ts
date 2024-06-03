@@ -8,6 +8,7 @@ export interface JWTPayload {
   origin: string;
   address: string;
   wallet: `0x${string}`;
+  ethermail_verified: boolean;
 }
 
 export interface RequestArguments {
@@ -23,3 +24,5 @@ export interface EIP1193Provider {
 export type Strategy = "iframe" | "ws";
 
 export type SupportedChain = 1 | 137;
+
+export type TokenErrorType = "permissions" | "expired";
