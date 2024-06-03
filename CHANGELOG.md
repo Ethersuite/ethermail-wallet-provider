@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.0
+
+### Minor Changes
+
+- bfd4426: Added Event Emitters by EIP1193
+
 ## 0.0.3
 
 ### Patch Changes
