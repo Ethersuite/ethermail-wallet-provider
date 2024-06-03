@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import type { SupportedChain, JWTPayload } from "./types";
+import type { SupportedChain, JWTPayload, TokenErrorType } from "./types";
 
 export const supportedChains = [1, 137] as const;
 
@@ -20,7 +20,9 @@ export function getProposerInfo() {
 
   const proposerName = header.getElementsByTagName("title")[0]?.innerText ?? "";
   const proposerURL = url.origin;
-  const proposerIcon = icon ? `${proposerURL}${icon}` : `${proposerURL}`;
+  const proposerIcon = icon?.includes("://")
+    ? `${icon}`
+    : `${proposerURL}${icon}`;
 
   return { proposerName, proposerURL, proposerIcon };
 }
@@ -53,10 +55,13 @@ export function buildRequestData(
   };
 }
 
-export function dispatchErrorEvent(type: "permissions" | "expired") {
-  const customEvent = new CustomEvent("EtherMailTokenError", {
-    detail: { type },
-  });
+export function dispatchErrorEvent(type: TokenErrorType) {
+  const customEvent = new CustomEvent<{ type: TokenErrorType }>(
+    "EtherMailTokenError",
+    {
+      detail: { type },
+    }
+  );
 
   window.dispatchEvent(customEvent);
 }

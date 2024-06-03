@@ -172,7 +172,14 @@ export class EtherMailProvider implements EIP1193Provider {
           chainId: this.chainId,
         });
 
-      case "eth_sign":
+      case "eth_sign": {
+        return await this._communicator?.emitAndWaitForResponse({
+          method,
+          data: hexToString(params[1]),
+          chainId: this.chainId,
+        });
+      }
+
       case "personal_sign":
       case "eth_signTypedData":
       case "eth_signTransaction":
