@@ -21,7 +21,6 @@ export interface EIP1193Provider {
   request(args: RequestArguments): Promise<unknown>;
   on(eventName: SupportedEvents, callback: Function): void;
   once(eventName: SupportedEvents, callback: Function): void;
-  once(eventName: SupportedEvents, callback: Function): void;
   removeAllListeners(eventName?: SupportedEvents): void;
 }
 
