@@ -1,8 +1,10 @@
 import { decodeToken, supportedChains } from "./utils";
 import { Communicator } from "./communicator";
-import { hexToString } from "viem";
+import {hexToString, ProviderRpcError} from "viem";
 import { getPublicClient } from "./client";
-import type { SupportedChain, EIP1193Provider, Strategy } from "./types";
+import type {SupportedChain, EIP1193Provider, Strategy, SupportedEvents} from "./types";
+import { EventEmitter } from "events";
+import {Listener} from "./types";
 
 export class EtherMailProvider implements EIP1193Provider {
   private _chainId: SupportedChain;
@@ -10,6 +12,8 @@ export class EtherMailProvider implements EIP1193Provider {
   private _strategy: Strategy;
   private _appUrl: string;
   private _websocketServer: string;
+  private _eventEmitter: EventEmitter;
+  private EVENTS: SupportedEvents[]  = ["connect", "disconnect", "chainChanged", "accountsChanged","message"]
 
   constructor({
     chainId = 1,
@@ -23,6 +27,7 @@ export class EtherMailProvider implements EIP1193Provider {
     this._appUrl = appUrl;
     this._websocketServer = websocketServer;
     this._chainId = chainId;
+    this._eventEmitter = new EventEmitter();
 
     if (window?.parent !== window) {
       this._strategy = "iframe";
@@ -35,6 +40,8 @@ export class EtherMailProvider implements EIP1193Provider {
       this._websocketServer,
       this._appUrl
     );
+
+    this._eventEmitter.emit("connect", { chainId: chainId.toString() });
   }
 
   public get chainId() {
@@ -48,6 +55,15 @@ export class EtherMailProvider implements EIP1193Provider {
   async disconnect(): Promise<void> {
     localStorage.removeItem("ethermail_token");
     this._communicator?.disconnect();
+
+    const error = new ProviderRpcError(
+        new Error("Provider Disconnected"),
+        {
+          shortMessage: "All chains disconnected",
+          code: 4900,
+        }
+    );
+    this._eventEmitter.emit("disconnect", error);
   }
 
   async request(request: { method: string; params?: any }) {
@@ -101,6 +117,7 @@ export class EtherMailProvider implements EIP1193Provider {
           throw new Error("Invalid chain");
 
         this.chainId = chainId;
+        this._eventEmitter.emit("chainChanged", { chainId: chainId.toString() });
         return this.chainId;
 
       case "eth_getBalance":
@@ -150,7 +167,9 @@ export class EtherMailProvider implements EIP1193Provider {
         return await publicClient.estimateGas(params[0]);
 
       case "eth_call":
-        return await publicClient.call(params[0]);
+        const callData = params[0];
+        this.emitMessageEvent(method, callData);
+        return await publicClient.call(callData);
 
       case "eth_getLogs":
         return await publicClient.getLogs(params[0]);
@@ -159,16 +178,22 @@ export class EtherMailProvider implements EIP1193Provider {
         return await publicClient.getGasPrice();
 
       case "eth_sendTransaction":
+        const txData = params[0];
+        this.emitMessageEvent(method, txData);
+
         return await this._communicator?.emitAndWaitForResponse({
           method,
-          data: params[0],
+          data: txData,
           chainId: this.chainId,
         });
 
       case "eth_signTypedData_v4":
+        const signV4Data = params[1] as any;
+        this.emitMessageEvent(method, signV4Data);
+
         return await this._communicator?.emitAndWaitForResponse({
           method,
-          data: params[1],
+          data: signV4Data,
           chainId: this.chainId,
         });
 
@@ -183,9 +208,12 @@ export class EtherMailProvider implements EIP1193Provider {
       case "personal_sign":
       case "eth_signTypedData":
       case "eth_signTransaction":
+        const dataToSign = hexToString(params[0]);
+        this.emitMessageEvent(method, dataToSign);
+
         return await this._communicator?.emitAndWaitForResponse({
           method,
-          data: hexToString(params[0]),
+          data: dataToSign,
           chainId: this.chainId,
         });
 
@@ -194,5 +222,36 @@ export class EtherMailProvider implements EIP1193Provider {
         throw new Error(`"${method}" not implemented`);
       }
     }
+  }
+
+  /*//////////////////////////////////////////////////////////////
+                         EVENT EMITTER METHODS
+  //////////////////////////////////////////////////////////////*/
+
+  public on(event: SupportedEvents, callback: Listener): void {
+    if (!this.EVENTS.includes(event)) throw new Error("Event not supported: " + event);
+
+    this._eventEmitter.on(event, callback);
+  }
+
+  public once(event: SupportedEvents, callback: Listener): void {
+    if (!this.EVENTS.includes(event)) throw new Error("Event not supported: " + event);
+
+    this._eventEmitter.once(event, callback);
+  }
+
+  public removeAllListeners(event?: SupportedEvents): void {
+    if (event && !this.EVENTS.includes(event)) {
+      throw new Error("Event not supported: " + event);
+    }
+    if (event) {
+      this._eventEmitter.removeAllListeners(event);
+    } else {
+      this._eventEmitter.removeAllListeners();
+    }
+  }
+
+  private emitMessageEvent(type: string, data: string) {
+    this._eventEmitter.emit("message", { type, data})
   }
 }
