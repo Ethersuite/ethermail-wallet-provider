@@ -3,6 +3,7 @@ import { Communicator } from "./communicator";
 import { hexToString } from "viem";
 import { getPublicClient } from "./client";
 import type { SupportedChain, EIP1193Provider, Strategy } from "./types";
+import { EventEmitter } from "events";
 
 export class EtherMailProvider implements EIP1193Provider {
   private _chainId: SupportedChain;
@@ -10,6 +11,7 @@ export class EtherMailProvider implements EIP1193Provider {
   private _strategy: Strategy;
   private _appUrl: string;
   private _websocketServer: string;
+  private _eventEmitter: EventEmitter;
 
   constructor({
     chainId = 1,
@@ -23,6 +25,7 @@ export class EtherMailProvider implements EIP1193Provider {
     this._appUrl = appUrl;
     this._websocketServer = websocketServer;
     this._chainId = chainId;
+    this._eventEmitter = new EventEmitter();
 
     if (window?.parent !== window) {
       this._strategy = "iframe";
@@ -35,6 +38,8 @@ export class EtherMailProvider implements EIP1193Provider {
       this._websocketServer,
       this._appUrl
     );
+
+    this._eventEmitter.emit("connect", chainId);
   }
 
   public get chainId() {
@@ -48,6 +53,7 @@ export class EtherMailProvider implements EIP1193Provider {
   async disconnect(): Promise<void> {
     localStorage.removeItem("ethermail_token");
     this._communicator?.disconnect();
+    this._eventEmitter.emit("disconnect", "Provider Disconnected");
   }
 
   async request(request: { method: string; params?: any }) {
@@ -101,6 +107,7 @@ export class EtherMailProvider implements EIP1193Provider {
           throw new Error("Invalid chain");
 
         this.chainId = chainId;
+        this._eventEmitter.emit("chainChanged", chainId);
         return this.chainId;
 
       case "eth_getBalance":
