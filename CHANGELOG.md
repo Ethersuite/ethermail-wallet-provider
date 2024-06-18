@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.1
+
+### Patch Changes
+
+- 03ed744: Update readme file, to add example of embedded script
+
 ## 0.1.0
 
 ### Minor Changes
