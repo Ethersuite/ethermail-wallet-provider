@@ -1,4 +1,5 @@
 # EtherMail
+
 ## _EtherMail SSO + Wallet Provider_
 
 EtherMail SSO enables apps to seamlessly support web2 and web3 login via EtherMail.
@@ -22,15 +23,41 @@ npm i @ethermail/ethermail-wallet-provider
 
 After embedding the login widget, add event listeners for custom events. You will receive the `EtherMailSignInOnSuccess` custom event on a successful login, and you can use that event to connect to our provider with web3.js/ethers.js, etc.
 
+Embedded script:
+
+```html
+<script defer>
+  (function ({ ...args }) {
+      var p = document.createElement('script');
+      p.src = 'https://cdn-email.ethermail.io/sdk/v2/staging-ethermail.js';
+      document.body.appendChild(p);
+      p.setAttribute('a', args.afid);
+      p.setAttribute('b', args.communityAlias);
+      p.setAttribute('c', args.features);
+    })({
+      afid: <AFID>,
+      communityAlias: <COMMUNITY_NAME>,
+      features: ['login']
+    });
+</script>
+
+<ethermail-login
+  widget="<ID>"
+  type="wallet"
+  permissions="write"
+></ethermail-login>
+```
+
 You will get back a JWT token:
+
 ```ts
 {
   exp: number;
   iat: number;
   iss: string;
   sub: string;
-  permissions: 'none' | 'read' | 'write';
-  type: 'sso' | 'wallet';
+  permissions: "none" | "read" | "write";
+  type: "sso" | "wallet";
   origin: string;
   address: string;
   wallet: `0x${string}`;
@@ -39,9 +66,10 @@ You will get back a JWT token:
 ```
 
 Example with ethers.js version 6:
+
 ```ts
 import { EtherMailProvider } from "@ethermail/ethermail-wallet-provider";
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider } from "ethers";
 
 let provider;
 
@@ -53,12 +81,13 @@ window.addEventListener("EtherMailSignInOnSuccess", async (event) => {
 
 function signMessage() {
   const signer = await provider.getSigner();
-  const signature = await signer.signMessage('Hello world');
+  const signature = await signer.signMessage("Hello world");
   console.log(signature);
 }
 ```
 
 Example with web3.js:
+
 ```ts
 import { EtherMailProvider } from "@ethermail/ethermail-wallet-provider";
 import Web3 from "web3";
