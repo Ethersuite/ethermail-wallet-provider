@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.2
+
+### Patch Changes
+
+- 56e2a7d: Use url origin if there is no title
+
 ## 0.1.1
 
 ### Patch Changes
