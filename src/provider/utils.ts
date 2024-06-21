@@ -18,8 +18,8 @@ export function getProposerInfo() {
   const iconLink = document.querySelector('link[rel="icon"]');
   const icon = iconLink?.getAttribute("href");
 
-  const proposerName = header.getElementsByTagName("title")[0]?.innerText ?? "";
   const proposerURL = url.origin;
+  const proposerName = header.getElementsByTagName("title")[0]?.innerText ?? proposerURL;
   const proposerIcon = icon?.includes("://")
     ? `${icon}`
     : `${proposerURL}${icon}`;
