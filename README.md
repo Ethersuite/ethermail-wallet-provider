@@ -124,3 +124,34 @@ window.addEventListener("EtherMailTokenError", (event) => {
   }
 });
 ```
+
+### Token Validation
+To validate a token, send a request to our API as demonstrated below. We recommend that you make this request on the server.
+```javascript
+const validateToken = async (token) => {
+  try {
+    const response = await fetch(
+      "https://api.ethermail.io/sso/validate-token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token: token,
+        }),
+      }
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+      console.log("Token is valid");
+    } else {
+      console.log("Token is invalid");
+    }
+  } catch (error) {
+    console.error("Error validating token:", error);
+  }
+};
+```
