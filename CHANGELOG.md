@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.3
+
+### Patch Changes
+
+- 2bcad6b: Update README to include token validation instructions
+
 ## 0.1.2
 
 ### Patch Changes
