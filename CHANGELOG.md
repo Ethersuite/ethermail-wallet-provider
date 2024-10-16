@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.4
+
+### Patch Changes
+
+- 8e4dd7e: Change auth mechanism as mobile libs dont support it properly
+
 ## 0.1.3
 
 ### Patch Changes
