@@ -25,7 +25,7 @@ export class Communicator {
     if (!this.socket && strategy === "ws" && token) {
       this.socket = io(this.websocketServer, {
         transports: ["websocket"],
-        auth: {
+        query: {
           token,
         },
       });
