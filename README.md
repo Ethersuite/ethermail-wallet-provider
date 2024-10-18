@@ -29,7 +29,7 @@ Embedded script:
 <script defer>
   (function ({ ...args }) {
       var p = document.createElement('script');
-      p.src = 'https://cdn-email.ethermail.io/sdk/v2/staging-ethermail.js';
+      p.src = 'https://cdn-email.ethermail.io/sdk/v2/ethermail.js';
       document.body.appendChild(p);
       p.setAttribute('a', args.afid);
       p.setAttribute('b', args.communityAlias);
