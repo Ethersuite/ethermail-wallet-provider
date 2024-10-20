@@ -60,10 +60,8 @@ export class Communicator {
       });
 
       this.socket.on('wallet-action-response', (data) => {
-        console.log('RESPONSEEEE', data);
         const queuedPromise = this.walletResponseMap.get(data.messageId);
 
-        console.log("FOUND QUEUED PROMISE", queuedPromise);
         if (!queuedPromise) {
           return;
         }
