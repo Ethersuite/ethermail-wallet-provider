@@ -3,6 +3,12 @@ import io from "socket.io-client";
 import { buildRequestData, decodeToken, dispatchErrorEvent } from "./utils";
 import type { SupportedChain, Strategy } from "./types";
 
+type QueuedPromise = {
+  promise: Promise<any>,
+  resolve: Function,
+  reject: Function
+}
+
 export class Communicator {
   private static instance?: Communicator;
   private socket?: SocketIO;
@@ -10,6 +16,9 @@ export class Communicator {
   private appUrl: string;
   private websocketServer: string;
   private clientId?: string;
+
+  private walletRequestArray: QueuedPromise[] = [];
+  private walletResponseMap: Map<string, QueuedPromise> = new Map<string, QueuedPromise>();
 
   private constructor(
     strategy: Strategy,
@@ -34,8 +43,41 @@ export class Communicator {
         this.clientId = this.socket?.id;
       });
 
-      this.socket?.on("connect_error", (error) => {
+      this.socket.on("connect_error", (error) => {
         console.log("CONNECT ERROR");
+      });
+
+      this.socket.on("token-error", () => {
+        localStorage.removeItem("ethermail_token");
+
+        dispatchErrorEvent("expired");
+      });
+
+      this.socket.on('wallet-action', (data) => {
+        const walletRequest = this.walletRequestArray.pop() as QueuedPromise;
+
+        this.walletResponseMap.set(data.messageId, walletRequest);
+      });
+
+      this.socket.on('wallet-action-response', (data) => {
+        console.log('RESPONSEEEE', data);
+        const queuedPromise = this.walletResponseMap.get(data.messageId);
+
+        console.log("FOUND QUEUED PROMISE", queuedPromise);
+        if (!queuedPromise) {
+          return;
+        }
+
+        this.walletResponseMap.delete(data.messageId);
+
+
+        if (data.data) {
+          queuedPromise.resolve(data.data);
+        }
+
+        if (data.error) {
+          queuedPromise.reject(data.error);
+        }
       });
     }
   }
@@ -92,7 +134,6 @@ export class Communicator {
     chainId: SupportedChain;
   }) {
     if (this.strategy === "ws") {
-
       if (this.clientId) {
           await this.checkPermissions();
 
@@ -114,25 +155,18 @@ export class Communicator {
         });
       }
 
-      const response = await new Promise((resolve, reject) => {
-        this.socket?.on("token-error", () => {
-          localStorage.removeItem("ethermail_token");
+      let res: Function, rej: Function;
 
-          dispatchErrorEvent("expired");
-        });
-
-        this.socket?.on("wallet-action-response", (data) => {
-          if (data.data) {
-            resolve(data.data);
-          }
-
-          if (data.error) {
-            reject(data.error);
-          }
-        });
+      const response = new Promise((resolve, reject) => {
+        res = resolve;
+        rej = reject;
       });
 
-      this.socket?.off("wallet-action-response");
+      this.walletRequestArray.push({
+        promise: response,
+        resolve: res!,
+        reject: rej!,
+      });
 
       return response;
     }
