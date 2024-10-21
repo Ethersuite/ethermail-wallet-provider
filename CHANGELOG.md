@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.5
+
+### Patch Changes
+
+- 4517b58: Create promise manager queue for proper handling
+
 ## 0.1.4
 
 ### Patch Changes
