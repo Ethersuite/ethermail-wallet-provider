@@ -1,5 +1,5 @@
 import { http, createPublicClient, Chain } from "viem";
-import { mainnet, polygon } from "viem/chains";
+import { mainnet, polygon, sepolia } from "viem/chains";
 import type { SupportedChain } from "./types";
 
 export const getPublicClient = (chainId: SupportedChain) => {
@@ -7,6 +7,10 @@ export const getPublicClient = (chainId: SupportedChain) => {
 
   if (chainId === 137) {
     chain = polygon;
+  }
+
+  if(chainId === 11155111) {
+    chain = sepolia;
   }
 
   return createPublicClient({

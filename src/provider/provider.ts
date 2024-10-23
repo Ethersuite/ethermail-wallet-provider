@@ -147,18 +147,20 @@ export class EtherMailProvider implements EIP1193Provider {
 
       case "eth_getBlockByNumber":
         return await publicClient.getBlock({
-          blockNumber: params[0],
-          blockTag: params[1],
+          blockTag: params[0],
+          blockNumber: params[1],
         });
 
       case "eth_getBlockByHash":
         return await publicClient.getBlock({
-          blockHash: params[0],
-          blockTag: params[1],
+          blockHash: params[0]
         });
 
       case "eth_getTransactionByHash":
-        return await publicClient.getTransaction({ hash: params[0] });
+        const response = await publicClient.getTransaction({ hash: params[0] });
+        // @ts-ignore
+        response.type = response.typeHex; // we do this because ethers has a bug
+        return response;
 
       case "eth_getTransactionReceipt":
         return await publicClient.getTransactionReceipt({ hash: params[0] });

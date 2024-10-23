@@ -26,7 +26,7 @@ export interface EIP1193Provider {
 
 export type Strategy = "iframe" | "ws";
 
-export type SupportedChain = 1 | 137;
+export type SupportedChain = 1 | 137 | 11155111;
 
 export type TokenErrorType = "permissions" | "expired";
 

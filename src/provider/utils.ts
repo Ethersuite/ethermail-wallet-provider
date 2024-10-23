@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import type { SupportedChain, JWTPayload, TokenErrorType } from "./types";
 
-export const supportedChains = [1, 137] as const;
+export const supportedChains = [1, 137, 11155111] as const;
 
 export const ethereumMethods = [
   "eth_sendTransaction",
