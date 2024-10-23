@@ -1,6 +1,6 @@
 {
   "name": "@ethermail/ethermail-wallet-provider",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Provider for EtherMail wallet",
   "private": false,
   "repository": "https://github.com/Ethersuite/ethermail-wallet-provider",
