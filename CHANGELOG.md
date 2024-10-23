@@ -1,5 +1,12 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.6
+
+### Patch Changes
+
+- 6f77a9e: Update viem, add sepolia, fix getBlock bug
+- 8d9aaca: Recreate pnpm
+
 ## 0.1.5
 
 ### Patch Changes
