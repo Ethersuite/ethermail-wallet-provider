@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.7
+
+### Patch Changes
+
+- 7813f92: Add missing lib @types
+
 ## 0.1.6
 
 ### Patch Changes
