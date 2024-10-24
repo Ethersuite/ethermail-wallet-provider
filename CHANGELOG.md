@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.8
+
+### Patch Changes
+
+- e843d05: Queue sockets
+
 ## 0.1.7
 
 ### Patch Changes
