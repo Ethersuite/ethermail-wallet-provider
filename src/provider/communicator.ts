@@ -2,6 +2,7 @@ import type { Socket as SocketIO } from "socket.io-client";
 import io from "socket.io-client";
 import { buildRequestData, decodeToken, dispatchErrorEvent } from "./utils";
 import type { SupportedChain, Strategy } from "./types";
+import { v4 as uuidv4 } from 'uuid';
 
 type QueuedPromise = {
   promise: Promise<any>,
@@ -16,6 +17,7 @@ export class Communicator {
   private appUrl: string;
   private websocketServer: string;
   private clientId?: string;
+  protected readonly deviceId;
 
   private walletRequestArray: QueuedPromise[] = [];
   private walletResponseMap: Map<string, QueuedPromise> = new Map<string, QueuedPromise>();
@@ -28,6 +30,7 @@ export class Communicator {
     this.strategy = strategy;
     this.websocketServer = websocketServer;
     this.appUrl = appUrl;
+    this.deviceId = uuidv4();
 
     const token = localStorage.getItem("ethermail_token");
 
@@ -36,6 +39,7 @@ export class Communicator {
         transports: ["websocket"],
         query: {
           token,
+          deviceId: this.deviceId // we send it to ensure reconnections can send to correct socket
         },
       });
 
@@ -137,7 +141,7 @@ export class Communicator {
 
         this.socket?.emit("wallet-action", {
           ...buildRequestData(method, data, chainId),
-          sessionId: this.socket?.id,
+          sessionId: this.deviceId,
           bridge: "ws",
         });
       } else {
@@ -147,7 +151,7 @@ export class Communicator {
           
           this.socket?.emit("wallet-action", {
             ...buildRequestData(method, data, chainId),
-            sessionId: this.socket?.id,
+            sessionId: this.deviceId,
             bridge: "ws",
           });
         });

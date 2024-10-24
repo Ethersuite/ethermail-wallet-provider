@@ -26,8 +26,10 @@
   },
   "dependencies": {
     "@types/events": "^3.0.3",
+    "@types/uuid": "^10.0.0",
     "jwt-decode": "^4.0.0",
     "socket.io-client": "^4.7.5",
+    "uuid": "^10.0.0",
     "viem": "^2.21.32"
   }
 }
