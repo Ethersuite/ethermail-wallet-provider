@@ -79,7 +79,7 @@ window.addEventListener("EtherMailSignInOnSuccess", async (event) => {
   provider = new BrowserProvider(new EtherMailProvider());
 });
 
-function signMessage() {
+async function signMessage() {
   const signer = await provider.getSigner();
   const signature = await signer.signMessage("Hello world");
   console.log(signature);
@@ -100,7 +100,7 @@ window.addEventListener("EtherMailSignInOnSuccess", async (event) => {
   web3 = new Web3(new EtherMailProvider());
 });
 
-function signMessage() {
+async function signMessage() {
   const account = await web3.eth.getAccounts();
   const signature = await web3.eth.personal.sign(
     web3.utils.utf8ToHex("Hello from web3"),
@@ -109,6 +109,24 @@ function signMessage() {
   );
   console.log(signature);
 }
+```
+
+For sendTransactions due to the way web3.js handles promises, errors and polling we recommend using the following approach
+
+```ts
+const tx = await web3Provider.eth.sendTransaction({
+  from: accounts[0],
+  to: recipient,
+  gas: gasEstimation,
+  value,
+  gasPrice
+})
+.on('transactionHash', function(hash){
+  // ...
+})
+.on('receipt', function(receipt){
+  // ...
+}).on('error', console.error);
 ```
 
 Another custom event is `EtherMailTokenError`, which will be used in case of token expiration or permissions error:
