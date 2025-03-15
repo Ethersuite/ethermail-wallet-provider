@@ -6,6 +6,10 @@ import type {SupportedChain, EIP1193Provider, Strategy, SupportedEvents} from ".
 import { EventEmitter } from "events";
 import {Listener} from "./types";
 
+/**
+ * The responsibility of the EtherMailProvider is to standardize events and information from the Communicator
+ * into an EIP1193Provider friendly format
+ */
 export class EtherMailProvider implements EIP1193Provider {
   private _chainId: SupportedChain;
   private _communicator?: Communicator;
@@ -41,6 +45,12 @@ export class EtherMailProvider implements EIP1193Provider {
       this._appUrl
     );
 
+    // TODO handle incoming events function / socket etc
+    this._communicator?.on('chainChanged', (data : { chainId: any }) => {
+      this.chainId = data.chainId;
+      this._eventEmitter.emit("chainChanged", { chainId: this.chainId });
+    });
+
     this._eventEmitter.emit("connect", { chainId: chainId.toString() });
   }
 
@@ -67,8 +77,6 @@ export class EtherMailProvider implements EIP1193Provider {
   }
 
   async request(request: { method: string; params?: any }) {
-    console.log(request);
-
     this._communicator = Communicator.getInstance(
       this._strategy,
       this._websocketServer,
@@ -104,21 +112,33 @@ export class EtherMailProvider implements EIP1193Provider {
       }
 
       case "net_version":
-      case "eth_chainId":
+      case "eth_chainId": {
+        // console.log("CURRENT CHAIN ID IN PROVIDER", this.chainId);
         return `0x${this.chainId.toString(16)}`;
-
+      }
       case "eth_blockNumber":
         return (await publicClient.getBlock({ blockTag: "latest" })).number;
 
-      case "wallet_switchEthereumChain":
+      case "wallet_switchEthereumChain": {
         const chainId = parseInt(params[0].chainId) as SupportedChain;
 
         if (!supportedChains.includes(chainId))
           throw new Error("Invalid chain");
 
         this.chainId = chainId;
-        this._eventEmitter.emit("chainChanged", { chainId: chainId.toString() });
-        return this.chainId;
+
+        await this._communicator?.emitAndWaitForResponse({
+          method,
+          data: {
+            chainId,
+          },
+          chainId,
+        });
+
+        // TODO understand why we need this if we're sending it on reactivity it doesn't feel like we should
+
+        return this._eventEmitter.emit("chainChanged", { chainId: chainId.toString() });
+      }
 
       case "eth_getBalance":
         return await publicClient.getBalance({
@@ -253,6 +273,7 @@ export class EtherMailProvider implements EIP1193Provider {
     }
   }
 
+  // TODO understand why we do this (maybe readme?)
   private emitMessageEvent(type: string, data: string) {
     this._eventEmitter.emit("message", { type, data})
   }
