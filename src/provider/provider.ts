@@ -89,8 +89,6 @@ export class EtherMailProvider implements EIP1193Provider {
 
       case 'net_version':
       case 'eth_chainId': {
-        console.log("GET CHAIN ID", this.chainId);
-        // console.log("CURRENT CHAIN ID IN PROVIDER", this.chainId);
         return `0x${this.chainId.toString(16)}`;
       }
       case 'eth_blockNumber':
