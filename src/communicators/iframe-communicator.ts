@@ -1,10 +1,12 @@
 import { SupportedChain } from '../provider/types';
 import { BaseCommunicator } from './base-communicator';
 import { buildRequestData } from '../provider/utils';
-import { AppEvent, ExternalEvent, ExternalListenerConfig } from './communicator';
+import { ExternalEvent, ExternalListenerConfig } from './communicator';
 import { Listener } from 'events';
 
 export class iframeCommunicator extends BaseCommunicator {
+  private eventListeners: Map<string, any[]> = new Map();
+
   constructor(options: { appUrl: string }) {
     super('iframe', options);
   }
@@ -26,14 +28,14 @@ export class iframeCommunicator extends BaseCommunicator {
   }
 
   public disconnect() {
-    localStorage.removeItem("ethermail_token");
+    this.eventListeners.forEach((listeners, eventName) => {
+      listeners.forEach((listener) => {
+        window.removeEventListener(eventName, listener);
+      });
+    });
 
-    // TODO iframe remove all listeners
-    // this._eventEmitter.emit("disconnect", error);
-  }
-
-  emit(event: AppEvent, data?: any) {
-    super.emit(event, data);
+    this.eventListeners.clear();
+    super.disconnect();
   }
 
   async emitExternalEvent(event: ExternalEvent, { data, chainId }: {
@@ -105,6 +107,7 @@ export class iframeCommunicator extends BaseCommunicator {
       };
 
       window.addEventListener('message', iframeSignHandler);
+      this.addListener('message', iframeSignHandler);
     });
   }
 
@@ -135,10 +138,32 @@ export class iframeCommunicator extends BaseCommunicator {
 
         if (config.once) {
           window.removeEventListener('message', messageHandler);
+          this.removeListener('message', messageHandler);
         }
       }
     };
 
     window.addEventListener('message', messageHandler);
+    this.addListener('message', messageHandler);
+  }
+
+  private addListener(event: string, listener: any): void {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, []);
+    }
+    this.eventListeners.get(event)!.push(listener);
+  }
+
+  private removeListener(event: string, listener: any): void {
+    if (this.eventListeners.has(event)) {
+      const listeners = this.eventListeners.get(event)!;
+      const index = listeners.indexOf(listener);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+      if (listeners.length === 0) {
+        this.eventListeners.delete(event);
+      }
+    }
   }
 }

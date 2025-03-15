@@ -3,7 +3,6 @@ import { BaseCommunicator } from './base-communicator';
 import { buildRequestData, decodeToken, dispatchErrorEvent } from '../provider/utils';
 import { AppEvent, ExternalEvent, ExternalListenerConfig } from './communicator';
 import { Listener } from 'events';
-import { ProviderRpcError } from 'viem';
 import io, { Socket as SocketIO } from 'socket.io-client';
 
 type QueuedPromise = {
@@ -114,26 +113,10 @@ export class SocketCommunicator extends BaseCommunicator {
   }
 
   public disconnect() {
-    localStorage.removeItem('ethermail_token');
-
-    // TODO
-    // this._communicator?.disconnect();
-
-    // const error = new ProviderRpcError(
-    //   new Error("Provider Disconnected"),
-    //   {
-    //     shortMessage: "All chains disconnected",
-    //     code: 4900,
-    //   }
-    // );
-
-
-    // TODO
-    // this._eventEmitter.emit("disconnect", error);
-  }
-
-  emit(event: AppEvent, data?: any) {
-    super.emit(event, data);
+    this.socket?.disconnect();
+    this.socket?.removeAllListeners();
+    this.socket = undefined;
+    super.disconnect();
   }
 
   private checkPermissions() {

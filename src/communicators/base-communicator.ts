@@ -19,14 +19,18 @@ export abstract class BaseCommunicator implements Communicator {
 
   abstract initialize(): void;
 
-  abstract disconnect(): void;
+  disconnect(): void {
+    localStorage.removeItem('ethermail_token');
+
+    this.listeners.clear();
+
+    this.emit({ name: "disconnect" });
+  }
 
   emit(event: AppEvent, data?: any): void {
     if (!this.listeners.get(event.name)) {
       this.listeners.set(event.name, []);
     }
-
-    // TODO wait for response
 
     this.listeners.get(event.name)!.forEach((listener) => {
       listener(data);
