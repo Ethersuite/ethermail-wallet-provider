@@ -7,6 +7,7 @@ import { Listener } from './types';
 import { iframeCommunicator } from '../communicators/iframe-communicator';
 import { Communicator } from '../communicators/communicator';
 import { SocketCommunicator } from '../communicators/socket-communicator';
+import { CommunicatorFactory } from '../communicators/communicator-factory';
 
 /**
  * The responsibility of the EtherMailProvider is to standardize events and information from the Communicator
@@ -30,17 +31,10 @@ export class EtherMailProvider implements EIP1193Provider {
     this._chainId = chainId;
     this._eventEmitter = new EventEmitter();
 
-    // TODO factory
-    if (window?.parent !== window) {
-      this._communicator = new iframeCommunicator({
-        appUrl,
-      });
-    } else {
-      this._communicator = new SocketCommunicator({
-        appUrl,
-        websocketServer
-      });
-    }
+    this._communicator = CommunicatorFactory.create({
+      appUrl,
+      websocketServer
+    });
 
     // listen to some externals or forwarding etc
     this._communicator.initialize();
