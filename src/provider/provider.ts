@@ -45,9 +45,7 @@ export class EtherMailProvider implements EIP1193Provider {
     // listen to some externals or forwarding etc
     this._communicator.initialize();
 
-    // TODO handle application chain changed? do i need this
     this._communicator?.on('chainChanged', (data: { chainId: any }) => {
-      console.log(">>>>>>>>> CHAIN CHANGED", data);
       this.chainId = data.chainId;
       this._eventEmitter.emit('chainChanged', { chainId: this.chainId });
     });
@@ -104,15 +102,13 @@ export class EtherMailProvider implements EIP1193Provider {
       case 'eth_blockNumber':
         return (await publicClient.getBlock({ blockTag: 'latest' })).number;
 
-      case 'wallet_switchEthereumChain': {
+        case 'wallet_switchEthereumChain': {
         const newChainId = parseInt(params[0].chainId) as SupportedChain;
 
         if (!supportedChains.includes(newChainId)) {
           throw new Error('Invalid chain');
         }
 
-        console.log("WHAT COMMUNICATOR", this._communicator);
-        // TODO see if we need to wait
         await this._communicator?.emitExternalEvent(
           {
             name: method,
@@ -126,8 +122,7 @@ export class EtherMailProvider implements EIP1193Provider {
 
         this.chainId = newChainId;
 
-        // TODO understand why we need this if we're sending it on reactivity it doesn't feel like we should
-        return this._eventEmitter.emit('chainChanged', { chainId: newChainId.toString() });
+        return null;
       }
 
       case 'eth_getBalance':
