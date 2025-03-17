@@ -102,13 +102,6 @@ export class SocketCommunicator extends BaseCommunicator {
     this.socket?.once('connect', async () => {
       this.clientId = this.socket?.id;
       await this.checkPermissions();
-
-      // TODO use emitExternal
-      // this.socket?.emit("wallet-action", {
-      //   ...buildRequestData(method, data, chainId),
-      //   sessionId: this.deviceId,
-      //   bridge: "ws",
-      // });
     });
   }
 
