@@ -1,12 +1,10 @@
-import { decodeToken, supportedChains } from './utils';
+import { supportedChains } from './utils';
 import { hexToString, ProviderRpcError } from 'viem';
 import { getPublicClient } from './client';
 import type { SupportedChain, EIP1193Provider, Strategy, SupportedEvents } from './types';
 import { EventEmitter } from 'events';
 import { Listener } from './types';
-import { iframeCommunicator } from '../communicators/iframe-communicator';
 import { Communicator } from '../communicators/communicator';
-import { SocketCommunicator } from '../communicators/socket-communicator';
 import { CommunicatorFactory } from '../communicators/communicator-factory';
 
 /**
@@ -15,21 +13,26 @@ import { CommunicatorFactory } from '../communicators/communicator-factory';
  */
 export class EtherMailProvider implements EIP1193Provider {
   private _chainId: SupportedChain;
+  private _rpcUrl?: string;
   private _communicator?: Communicator;
   private _eventEmitter: EventEmitter;
+
   private EVENTS: SupportedEvents[] = ['connect', 'disconnect', 'chainChanged', 'accountsChanged', 'message'];
 
   constructor({
                 chainId = 1,
                 websocketServer = 'wss://api.ethermail.io/events',
                 appUrl = 'https://ethermail.io',
+                rpcUrl = undefined,
               }: {
     chainId?: SupportedChain;
     websocketServer?: string;
     appUrl?: string;
+    rpcUrl?: string;
   } = {}) {
     this._chainId = chainId;
     this._eventEmitter = new EventEmitter();
+    this._rpcUrl = rpcUrl;
 
     this._communicator = CommunicatorFactory.create({
       appUrl,
@@ -72,7 +75,7 @@ export class EtherMailProvider implements EIP1193Provider {
   async request(request: { method: string; params?: any }) {
     const { method, params = [] } = request;
 
-    const publicClient = getPublicClient(this.chainId);
+    const publicClient = getPublicClient(this.chainId, this._rpcUrl);
 
     switch (method) {
       case 'eth_accounts': {
@@ -164,7 +167,6 @@ export class EtherMailProvider implements EIP1193Provider {
 
       case 'eth_estimateGas':
         return await publicClient.estimateGas(params[0]);
-
       case 'eth_call':
         const callData = params[0];
         this.emitMessageEvent(method, callData);
