@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.9
+
+### Patch Changes
+
+- 2639fcb: Add two way communication and cleanup communication mechanisms
+
 ## 0.1.8
 
 ### Patch Changes
