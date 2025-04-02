@@ -6,6 +6,7 @@ import { EventEmitter } from 'events';
 import { Listener } from './types';
 import { Communicator } from '../communicators/communicator';
 import { CommunicatorFactory } from '../communicators/communicator-factory';
+import { RpcProviderService } from '../services/rpc-provider.service';
 
 /**
  * The responsibility of the EtherMailProvider is to standardize events and information from the Communicator
@@ -16,6 +17,7 @@ export class EtherMailProvider implements EIP1193Provider {
   private _rpcUrl?: string;
   private _communicator?: Communicator;
   private _eventEmitter: EventEmitter;
+  private _rpcProviderService: RpcProviderService;
 
   private EVENTS: SupportedEvents[] = ['connect', 'disconnect', 'chainChanged', 'accountsChanged', 'message'];
 
@@ -30,9 +32,11 @@ export class EtherMailProvider implements EIP1193Provider {
     appUrl?: string;
     rpcUrl?: string;
   } = {}) {
+    this._rpcProviderService = new RpcProviderService(rpcUrl ?? '', chainId);
+
     this._chainId = chainId;
     this._eventEmitter = new EventEmitter();
-    this._rpcUrl = rpcUrl;
+    this._rpcUrl = this._rpcProviderService.currentRPCUrl;
 
     this._communicator = CommunicatorFactory.create({
       appUrl,
@@ -42,8 +46,9 @@ export class EtherMailProvider implements EIP1193Provider {
     // listen to some externals or forwarding etc
     this._communicator.initialize();
 
-    this._communicator?.on('chainChanged', (data: { chainId: any }) => {
+    this._communicator?.on('chainChanged', async (data: { chainId: any }) => {
       this.chainId = data.chainId;
+      this._rpcUrl = await this._rpcProviderService.getPublicRpcUrlForChain(data.chainId);
       this._eventEmitter.emit('chainChanged', { chainId: this.chainId });
     });
 
@@ -166,7 +171,12 @@ export class EtherMailProvider implements EIP1193Provider {
         return await publicClient.getTransactionReceipt({ hash: params[0] });
 
       case 'eth_estimateGas':
-        return await publicClient.estimateGas(params[0]);
+        const txObject = { ...params[0] };
+        if (Object.keys(txObject).includes("from")) {
+          txObject['account'] = txObject.from;
+          delete txObject.from;
+        }
+        return await publicClient.estimateGas(txObject);
       case 'eth_call':
         const callData = params[0];
         this.emitMessageEvent(method, callData);
