@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.13
+
+### Patch Changes
+
+- 1822296: Ignore window.ethereum
+
 ## 0.1.12
 
 ### Patch Changes
