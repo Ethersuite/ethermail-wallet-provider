@@ -115,7 +115,7 @@ export class iframeCommunicator extends BaseCommunicator {
     const messageHandler = (event: MessageEvent) => {
       const { data, origin } = event;
 
-      if (origin === this.appUrl) {
+      if (!window?.ethereum?.isEtherMail || origin === this.appUrl) {
         // TODO add reject timeout?
 
         if (data && data.type === 'iframeSign') {
