@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.12
+
+### Patch Changes
+
+- 7208336: Fix iframe listener when ethermail provider
+
 ## 0.1.9
 
 ### Patch Changes
