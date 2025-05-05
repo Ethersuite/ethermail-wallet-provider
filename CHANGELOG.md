@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.14
+
+### Patch Changes
+
+- c18f2e3: Fix iframe communication ethermail provider
+
 ## 0.1.13
 
 ### Patch Changes
