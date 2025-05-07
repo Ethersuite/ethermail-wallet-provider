@@ -2,12 +2,14 @@
 
 ## _EtherMail SSO + Wallet Provider_
 
-EtherMail SSO enables apps to seamlessly support web2 and web3 login via EtherMail.
+EtherMail SSO enables apps to seamlessly support web2 and web3 login via EtherMail.  
+Now, EtherMail's token is **OAuth 2.0 compatible**, making it even easier to integrate with existing authentication systems.
 
 ## Features
 
 - Enable web2 and web3 login
 - Allow users to choose permissions to enable/disable wallet interactions
+- **OAuth 2.0 Compatibility** for easier integration with third-party services
 
 ## Installation
 
@@ -48,7 +50,7 @@ Embedded script:
 ></ethermail-login>
 ```
 
-You will get back a JWT token:
+You will get back an **OAuth 2.0 compatible JWT** token:
 
 ```ts
 {
@@ -111,7 +113,7 @@ async function signMessage() {
 }
 ```
 
-For sendTransactions due to the way web3.js handles promises, errors and polling we recommend using the following approach
+For sendTransactions due to the way web3.js handles promises, errors and polling, we recommend using the following approach
 
 ```ts
 const tx = await web3Provider.eth.sendTransaction({
@@ -144,6 +146,8 @@ window.addEventListener("EtherMailTokenError", (event) => {
 ```
 
 ### Token Validation
+
+#### API Call
 To validate a token, send a request to our API as demonstrated below. We recommend that you make this request on the server.
 ```javascript
 const validateToken = async (token) => {
@@ -172,4 +176,50 @@ const validateToken = async (token) => {
     console.error("Error validating token:", error);
   }
 };
+```
+
+### OAuth 2.0 Compatibility
+EtherMail's JWT is fully **OAuth 2.0 compatible**, allowing it to be easily integrated with third-party OAuth clients. This enables seamless authentication across different platforms, with full support for OpenID Connect (OIDC).
+
+### Endpoints:
+- **OpenID Configuration:**  
+  [https://api.ethermail.io/.well-known/openid-configuration](https://api.ethermail.io/.well-known/openid-configuration)
+
+- **JWK URI:**  
+  [https://api.ethermail.io/.well-known/jwks.json](https://api.ethermail.io/.well-known/jwks.json)
+
+```javascript
+import axios from 'axios';
+import { createPublicKey } from 'crypto';
+import jwt from 'jsonwebtoken';
+
+async function validateTokenByOpenIDConfig(token: string) {
+    // 🔹 Fetch OpenID Configuration
+    const { data: { jwks_uri } } = await axios.get(`https://api.ethermail.io/.well-known/openid-configuration`);
+
+    // 🔹 Fetch JWKS
+    const { data: jwkKeys } = await axios.get(jwks_uri);
+
+    // 🔹 Extract key from the JWKS
+    const jwk = jwkKeys.keys[0];
+
+    // 🔹 Convert JWK to PEM format
+    const publicKeyPem = jwkToPem(jwk);
+
+    // 🔹 Verify the Token
+    const decodedToken = jwt.verify(token, publicKeyPem, {
+        algorithms: ['RS256'],
+    });
+
+    return { message: 'Token is valid', decodedToken };
+}
+
+function jwkToPem(jwk: any): string {
+    const keyObject = createPublicKey({
+        key: jwk,
+        format: 'jwk',
+    });
+
+    return keyObject.export({ type: 'spki', format: 'pem' }).toString();
+}
 ```
