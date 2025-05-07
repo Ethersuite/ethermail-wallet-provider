@@ -1,5 +1,23 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.14
+
+### Patch Changes
+
+- c18f2e3: Fix iframe communication ethermail provider
+
+## 0.1.13
+
+### Patch Changes
+
+- 1822296: Ignore window.ethereum
+
+## 0.1.12
+
+### Patch Changes
+
+- 7208336: Fix iframe listener when ethermail provider
+
 ## 0.1.9
 
 ### Patch Changes
