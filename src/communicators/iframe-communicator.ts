@@ -2,6 +2,7 @@ import { SupportedChain } from '../provider/types';
 import { BaseCommunicator } from './base-communicator';
 import { buildRequestData } from '../provider/utils';
 import { ExternalEvent, ExternalListenerConfig } from './communicator';
+// @ts-ignore
 import { Listener } from 'events';
 
 export class iframeCommunicator extends BaseCommunicator {
@@ -15,7 +16,7 @@ export class iframeCommunicator extends BaseCommunicator {
     this.onExternalEvent({
       name: 'chainChanged',
       once: false,
-    }, (data: { chainId: string | number }, error) => {
+    }, (data: { chainId: string | number }, error: any) => {
       if (error) {
         console.error(error);
         return;
@@ -63,7 +64,7 @@ export class iframeCommunicator extends BaseCommunicator {
             name: event.name,
             requestId: uuid,
             once: true,
-          }, (response, error) => {
+          }, (response: any, error: any) => {
             if (error) {
               reject(error);
               return;
@@ -76,7 +77,7 @@ export class iframeCommunicator extends BaseCommunicator {
             name: event.name,
             requestId: requestData.id,
             once: true,
-          }, (response, error) => {
+          }, (response: any, error: any) => {
             if (error) {
               reject(error);
               return;

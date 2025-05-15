@@ -101,7 +101,6 @@ export class EtherMailProvider implements EIP1193Provider {
       }
       case 'eth_blockNumber':
         return (await publicClient.getBlock({ blockTag: 'latest' })).number;
-
       case 'wallet_switchEthereumChain': {
         const newChainId = parseInt(params[0].chainId) as SupportedChain;
 

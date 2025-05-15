@@ -65,3 +65,15 @@ export function dispatchErrorEvent(type: TokenErrorType) {
 
   window.dispatchEvent(customEvent);
 }
+
+export interface EtherMailSignInOnSuccessEvent extends Event {
+  detail: {
+    token: string;
+  };
+}
+
+export interface EtherMailTokenErrorEvent extends Event {
+  detail: {
+    type: "expired" | "permissions";
+  };
+}

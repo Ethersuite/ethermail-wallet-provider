@@ -1,6 +1,6 @@
 {
   "name": "@ethermail/ethermail-wallet-provider",
-  "version": "0.1.15",
+  "version": "0.1.17",
   "description": "Provider for EtherMail wallet",
   "private": false,
   "repository": "https://github.com/Ethersuite/ethermail-wallet-provider",
@@ -21,12 +21,14 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "tsup": "^8.0.2",
+    "tsup": "8.3.5",
     "typescript": "^5.4.4"
   },
   "dependencies": {
     "@types/events": "^3.0.3",
     "@types/uuid": "^10.0.0",
+    "@wagmi/core": "^2.17.2",
+    "ethers": "^6.14.0",
     "jwt-decode": "^4.0.0",
     "socket.io-client": "^4.7.5",
     "uuid": "^10.0.0",
