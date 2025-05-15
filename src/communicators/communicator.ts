@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Listener } from 'events';
 import { SupportedEvents } from '../provider/types';
 

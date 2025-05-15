@@ -2,6 +2,7 @@ import { SupportedChain } from '../provider/types';
 import { BaseCommunicator } from './base-communicator';
 import { buildRequestData, decodeToken, dispatchErrorEvent } from '../provider/utils';
 import { AppEvent, ExternalEvent, ExternalListenerConfig } from './communicator';
+// @ts-ignore/
 import { Listener } from 'events';
 import io, { Socket as SocketIO } from 'socket.io-client';
 
@@ -37,7 +38,7 @@ export class SocketCommunicator extends BaseCommunicator {
     this.onExternalEvent({
       name: 'chainChanged',
       once: false,
-    }, (data: { chainId: string | number }, error) => {
+    }, (data: { chainId: string | number }, error: any) => {
       if (error) {
         console.error(error);
         return;

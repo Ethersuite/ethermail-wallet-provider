@@ -1,6 +1,7 @@
 import { AppEvent, Communicator, ExternalEvent, ExternalListenerConfig } from './communicator';
 import { v4 as uuidv4 } from 'uuid';
 import { Strategy, SupportedChain, SupportedEvents } from '../provider/types';
+// @ts-ignore
 import { Listener } from 'events';
 
 // TODO EventEmitter?
