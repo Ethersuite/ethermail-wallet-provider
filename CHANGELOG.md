@@ -1,5 +1,11 @@
 # @ethermail/ethermail-wallet-provider
 
+## 0.1.15
+
+### Patch Changes
+
+- 40617bc: fix:iFrame communication when ethermail provider
+
 ## 0.1.14
 
 ### Patch Changes
