@@ -145,6 +145,46 @@ window.addEventListener("EtherMailTokenError", (event) => {
 });
 ```
 
+### Wallet Tool Integrations
+
+#### Wagmi
+
+We provide tools to seamless integration with Wagmi, enabling easy connection to the EtherMail provider. All necessary code for Wagmi compatibility is included within the `ethermailConnector` function from `@ethermail/ethermail-wallet-provider`.
+
+Below is a step-by-step example of how to set up the `ethermailConnector` in a Wagmi project:
+
+```javascript
+import { http, createConfig, injected } from "wagmi";
+import { walletConnect } from "wagmi/connectors";
+import { mainnet, polygon, arbitrum, sepolia } from 'wagmi/chains';
+import { ethermailConnector } from "@ethermail/ethermail-wallet-provider";
+
+export const config = createConfig({
+  chains: [mainnet, polygon, arbitrum, sepolia],
+  connectors: [
+    injected(),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? '',
+    }),
+    ethermailConnector({
+      widget_id: process.env.NEXT_PUBLIC_WIDGET_ID ?? '',
+      afid: process.env.NEXT_PUBLIC_WIDGET_AFID ?? '',
+      community_name: process.env.NEXT_PUBLIC_WIDGET_COMMUNITY_NAME ?? '',
+      permissions: 'write',
+      loginType: 'wallet',
+    })
+  ],
+  transports: {
+    [mainnet.id]: http(),
+    [polygon.id]: http(),
+    [arbitrum.id]: http(),
+    [sepolia.id]: http(),
+  },
+})
+```
+
+After the connection is established with the connector, the actions can be requested to the user normally with the `walletClient`. 
+
 ### Token Validation
 
 #### API Call
