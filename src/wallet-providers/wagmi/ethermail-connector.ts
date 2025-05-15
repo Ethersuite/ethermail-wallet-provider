@@ -217,7 +217,10 @@ const runEthermailSDKScript = async (environment: EnvironmentType, afid: string,
     const scriptUrl = getEtherMailSDKScriptUrl(environment);
 
     (function({ ...args }) {
-        if (!document.getElementById('ethermail-sdk-script')) {
+        const ethermailSDKScript = Array.from(document.getElementsByTagName('script')).find(
+            (script) => script.src === scriptUrl || script.src === 'https://cdn-email.ethermail.io/sdk/v2/ethermail.js'
+        );
+        if (!ethermailSDKScript) {
             var p = document.createElement('script');
             p.id = 'ethermail-sdk-script';
             p.src = scriptUrl ?? 'https://cdn-email.ethermail.io/sdk/v2/ethermail.js';
