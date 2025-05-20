@@ -1,6 +1,7 @@
 import { http, createPublicClient, Chain } from 'viem';
 import { mainnet, polygon, celo, bsc, fantom, avalanche, arbitrum, base, sepolia } from 'viem/chains';
 import type { SupportedChain } from './types';
+import { HttpTransportConfig } from 'viem/clients/transports/http';
 
 const supportedChains: Chain[] = [
     mainnet,
@@ -14,7 +15,7 @@ const supportedChains: Chain[] = [
     sepolia,
 ];
 
-export const getPublicClient = (chainId: SupportedChain, rpcUrl?: string) => {
+export const getPublicClient = (chainId: SupportedChain, rpcUrl: string, rpcUrlConfig: HttpTransportConfig = {}) => {
   let chain: Chain = mainnet;
   for (const supportedChain of supportedChains) {
     if (chainId === supportedChain.id) {
@@ -24,6 +25,6 @@ export const getPublicClient = (chainId: SupportedChain, rpcUrl?: string) => {
 
   return createPublicClient({
     chain,
-    transport: http(rpcUrl),
+    transport: http(rpcUrl, rpcUrlConfig),
   });
 };

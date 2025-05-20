@@ -27,14 +27,21 @@ export class RpcProviderService {
     }
 
     public async isValidRPCUrl(chainId: SupportedChain, rpcUrl: string): Promise<boolean> {
-        const rpcClient = getPublicClient(chainId, rpcUrl);
-        const rpcResponseBlockNumber = await rpcClient.getChainId();
+        try {
+            const rpcClient = getPublicClient(chainId, rpcUrl, { retryCount: 0 });
+            const rpcResponseBlockNumber = await rpcClient.getChainId();
+            const rpcResponseBlock = await rpcClient.getBlock();
 
-        return !!rpcResponseBlockNumber && rpcResponseBlockNumber === chainId;
+            return !!rpcResponseBlockNumber && rpcResponseBlockNumber === chainId && !!rpcResponseBlock;
+        } catch (err: any) {
+            console.error(err);
+            return false;
+        }
+
     }
 
     public async getPublicRpcUrlForChain(chainId: SupportedChain): Promise<string> {
-        if (chainId === this.defaultChainID) {
+        if (chainId === this.defaultChainID && !!this.defaultRPCUrl) {
             return this.defaultRPCUrl;
         }
 
