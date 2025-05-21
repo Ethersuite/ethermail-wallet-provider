@@ -1,7 +1,12 @@
 import { http, createPublicClient, Chain } from 'viem';
 import { mainnet, polygon, celo, bsc, fantom, avalanche, arbitrum, base, sepolia } from 'viem/chains';
 import type { SupportedChain } from './types';
-import { HttpTransportConfig } from 'viem/clients/transports/http';
+
+export type HttpTransportConfig = {
+    retryCount?: number;
+    retryDelay?: number;
+    timeout?: number;
+}
 
 const supportedChains: Chain[] = [
     mainnet,
