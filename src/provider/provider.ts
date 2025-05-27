@@ -7,6 +7,7 @@ import { Listener } from './types';
 import { Communicator } from '../communicators/communicator';
 import { CommunicatorFactory } from '../communicators/communicator-factory';
 import { RpcProviderService } from '../services/rpc-provider.service';
+import { ethers } from "ethers";
 
 /**
  * The responsibility of the EtherMailProvider is to standardize events and information from the Communicator
@@ -53,12 +54,6 @@ export class EtherMailProvider implements EIP1193Provider {
     });
 
     this._eventEmitter.emit('connect', { chainId: chainId.toString() });
-
-    if (!rpcUrl) {
-      this._rpcProviderService.getPublicRpcUrlForChain(this._chainId).then((rpcUrl) => {
-        this._rpcUrl = rpcUrl;
-      });
-    }
   }
 
   public get chainId() {
@@ -87,6 +82,7 @@ export class EtherMailProvider implements EIP1193Provider {
     const { method, params = [] } = request;
 
     const publicClient = getPublicClient(this.chainId, this._rpcUrl!);
+    const ethersProvider = new ethers.BrowserProvider(publicClient);
 
     switch (method) {
       case 'eth_accounts': {
@@ -106,7 +102,7 @@ export class EtherMailProvider implements EIP1193Provider {
         return `0x${this.chainId.toString(16)}`;
       }
       case 'eth_blockNumber':
-        return (await publicClient.getBlock({ blockTag: 'latest' })).number;
+        return await ethersProvider.getBlockNumber();
       case 'wallet_switchEthereumChain': {
         const newChainId = parseInt(params[0].chainId) as SupportedChain;
 
@@ -156,15 +152,9 @@ export class EtherMailProvider implements EIP1193Provider {
         });
 
       case 'eth_getBlockByNumber':
-        return await publicClient.getBlock({
-          blockTag: params[0],
-          blockNumber: params[1],
-        });
-
+        return await ethersProvider.getBlock(params[0], true);
       case 'eth_getBlockByHash':
-        return await publicClient.getBlock({
-          blockHash: params[0],
-        });
+        return await ethersProvider.getBlock(params[0], true);
 
       case 'eth_getTransactionByHash':
         const response = await publicClient.getTransaction({ hash: params[0] });
@@ -185,7 +175,7 @@ export class EtherMailProvider implements EIP1193Provider {
       case 'eth_call':
         const callData = params[0];
         this.emitMessageEvent(method, callData);
-        return await publicClient.call(callData);
+        return await ethersProvider.call(callData);
 
       case 'eth_getLogs':
         return await publicClient.getLogs(params[0]);
