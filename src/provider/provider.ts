@@ -54,12 +54,6 @@ export class EtherMailProvider implements EIP1193Provider {
     });
 
     this._eventEmitter.emit('connect', { chainId: chainId.toString() });
-
-    if (!rpcUrl) {
-      this._rpcProviderService.getPublicRpcUrlForChain(this._chainId).then((rpcUrl) => {
-        this._rpcUrl = rpcUrl;
-      });
-    }
   }
 
   public get chainId() {
